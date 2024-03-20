@@ -10,4 +10,13 @@ const selectedView = ref(transactionViewOptions[1]);
 			<USelectMenu v-model="selectedView" :options="transactionViewOptions" />
 		</div>
 	</section>
+
+	<section
+		class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 sm:gap-16 mb-10"
+	>
+		<Trend />
+		<Trend />
+		<Trend />
+		<Trend />
+	</section>
 </template>
