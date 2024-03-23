@@ -1,6 +1,6 @@
 <script setup>
-const { currency } = useCurrency(1200);
-const items = [
+const { currency: amount } = useCurrency(1200);
+const actions = [
 	[
 		{
 			label: 'Edit',
@@ -30,9 +30,9 @@ const items = [
 			</div>
 		</div>
 		<div class="flex items-center justify-end space-x-2">
-			<div>{{ currency }}</div>
+			<div>{{ amount }}</div>
 			<div>
-				<UDropdown :items="items" :popper="{ placement: 'bottom-start' }">
+				<UDropdown :items="actions" :popper="{ placement: 'bottom-start' }">
 					<UButton
 						size="sm"
 						color="white"
