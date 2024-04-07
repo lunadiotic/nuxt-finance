@@ -1,25 +1,30 @@
 <script setup>
 import { transactionViewOptions } from '~/constants';
+
 const selectedView = ref(transactionViewOptions[1]);
+const transactions = ref([]);
+const loading = ref(true);
 
 const supabase = useSupabaseClient();
-// const { data, error } = await supabase.from('transactions').select();
 
-// const { count, error } = await supabase
-//   .from('transactions')
-//   .select('*', { count: 'exact', head: true })
+const fetchData = async () => {
+	try {
+		const { data, error } = await supabase
+			.from('transactions')
+			.select('*')
+			.order('created_at', { ascending: false });
+		if (error) {
+			throw new Error('Failed to fetch data');
+		}
+		transactions.value = data;
+	} catch (error) {
+		console.error(error);
+	} finally {
+		loading.value = false;
+	}
+};
 
-// const { data, error } = await supabase
-// 	.from('transactions')
-// 	.select()
-// 	.eq('type', 'expense');
-
-const { data, error } = await supabase
-	.from('transactions')
-	.select('description')
-	.gte('amount', 2000);
-
-console.log(error, data);
+onMounted(fetchData);
 </script>
 
 <template>
@@ -39,10 +44,14 @@ console.log(error, data);
 		<Trend title="Budget" :amount="1000" :lastAmount="500" :loading="true" />
 	</section>
 
-	<section>
-		<Transaction />
-		<Transaction />
-		<Transaction />
-		<Transaction />
+	<section v-if="loading">
+		<USkeleton class="h-6 w-full" />
+	</section>
+	<section v-else>
+		<Transaction
+			v-for="(t, index) in transactions"
+			:key="index"
+			:transaction="t"
+		/>
 	</section>
 </template>
