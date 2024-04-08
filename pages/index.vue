@@ -2,7 +2,6 @@
 import { transactionViewOptions } from '~/constants';
 
 const supabase = useSupabaseClient();
-
 const selectedView = ref(transactionViewOptions[1]);
 const transactions = ref([]);
 
@@ -33,8 +32,8 @@ transactions.value = data.value;
 
 	<section>
 		<Transaction
-			v-for="transaction in transactions"
-			:key="transaction.id"
+			v-for="(transaction, index) in transactions"
+			:key="index"
 			:transaction="transaction"
 		/>
 	</section>
