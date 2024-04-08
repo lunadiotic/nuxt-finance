@@ -6,7 +6,10 @@ const selectedView = ref(transactionViewOptions[1]);
 const transactions = ref([]);
 
 const { data, pending } = await useAsyncData('transactions', async () => {
-	const { data, error } = await supabase.from('transactions').select();
+	const { data, error } = await supabase
+		.from('transactions')
+		.select()
+		.order('created_at', { ascending: false });
 	if (error) return [];
 	return data;
 });
@@ -27,8 +30,6 @@ const transactionsGroupedByDate = computed(() => {
 
 	return grouped;
 });
-
-console.log(transactionsGroupedByDate.value);
 </script>
 
 <template>
@@ -49,10 +50,17 @@ console.log(transactionsGroupedByDate.value);
 	</section>
 
 	<section>
-		<Transaction
-			v-for="(transaction, index) in transactions"
-			:key="index"
-			:transaction="transaction"
-		/>
+		<div
+			v-for="(transactionOnDay, date) in transactionsGroupedByDate"
+			:key="date"
+			class="mb-10"
+		>
+			<TransactionDailySummary :date="date" :transactions="transactionOnDay" />
+			<Transaction
+				v-for="(transaction, index) in transactionOnDay"
+				:key="index"
+				:transaction="transaction"
+			/>
+		</div>
 	</section>
 </template>
