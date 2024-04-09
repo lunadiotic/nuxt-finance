@@ -4,16 +4,31 @@ import { transactionViewOptions } from '~/constants';
 const supabase = useSupabaseClient();
 const selectedView = ref(transactionViewOptions[1]);
 const transactions = ref([]);
+const isLoading = ref(false);
 
-const { data, pending } = await useAsyncData('transactions', async () => {
-	const { data, error } = await supabase
-		.from('transactions')
-		.select()
-		.order('created_at', { ascending: false });
-	if (error) return [];
-	return data;
-});
-transactions.value = data.value;
+const fetchTransactions = async () => {
+	isLoading.value = true;
+	try {
+		const { data } = await useAsyncData('transactions', async () => {
+			const { data, error } = await supabase
+				.from('transactions')
+				.select()
+				.order('created_at', { ascending: false });
+			if (error) return [];
+			return data;
+		});
+
+		return data.value;
+	} finally {
+		isLoading.value = false;
+	}
+};
+
+const refreshTransactions = async () => {
+	transactions.value = await fetchTransactions();
+};
+
+await refreshTransactions();
 
 const transactionsGroupedByDate = computed(() => {
 	let grouped = {};
@@ -43,13 +58,33 @@ const transactionsGroupedByDate = computed(() => {
 	<section
 		class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 sm:gap-16 mb-10"
 	>
-		<Trend title="Income" :amount="1000" :lastAmount="500" :loading="false" />
-		<Trend title="Expense" :amount="1000" :lastAmount="3000" :loading="false" />
-		<Trend title="Savings" :amount="1000" :lastAmount="1500" :loading="false" />
-		<Trend title="Budget" :amount="1000" :lastAmount="500" :loading="true" />
+		<Trend
+			title="Income"
+			:amount="1000"
+			:lastAmount="500"
+			:loading="isLoading"
+		/>
+		<Trend
+			title="Expense"
+			:amount="1000"
+			:lastAmount="3000"
+			:loading="isLoading"
+		/>
+		<Trend
+			title="Savings"
+			:amount="1000"
+			:lastAmount="1500"
+			:loading="isLoading"
+		/>
+		<Trend
+			title="Budget"
+			:amount="1000"
+			:lastAmount="500"
+			:loading="isLoading"
+		/>
 	</section>
 
-	<section>
+	<section v-if="!isLoading">
 		<div
 			v-for="(transactionOnDay, date) in transactionsGroupedByDate"
 			:key="date"
@@ -60,7 +95,11 @@ const transactionsGroupedByDate = computed(() => {
 				v-for="(transaction, index) in transactionOnDay"
 				:key="index"
 				:transaction="transaction"
+				@delete="refreshTransactions()"
 			/>
 		</div>
+	</section>
+	<section v-else>
+		<USkeleton v-for="i in 3" :key="i" class="h-8 w-full mb-2" />
 	</section>
 </template>
