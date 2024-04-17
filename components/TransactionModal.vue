@@ -10,15 +10,21 @@ const isModalOpen = computed({
 		return props.modelValue;
 	},
 	set(value) {
+		if (!value) {
+			resetForm();
+		}
 		emit('update:modelValue', value);
 	},
 });
-
-const state = ref({
+const initialState = {
 	created_at: new Date().toISOString().split('T')[0],
 	description: undefined,
 	type: transactionTypeOptions[0],
 	amount: 0,
+};
+
+const state = reactive({
+	...initialState,
 });
 
 const schema = z.object({
@@ -30,12 +36,16 @@ const schema = z.object({
 
 const form = ref();
 
-const toast = useToast();
-const supabase = useSupabaseClient();
-
-const addTransaction = async () => {
-	form.value.validate();
+const resetForm = () => {
+	Object.assign(state, initialState);
+	form.value.clear();
 };
+
+async function addTransaction(event) {
+	if (form.value.errors.length) return;
+	console.log(event.data);
+	isModalOpen.value = false;
+}
 </script>
 
 <template>
@@ -62,7 +72,7 @@ const addTransaction = async () => {
 				:state="state"
 				:schema="schema"
 				ref="form"
-				@submit.prevent="addTransaction"
+				@submit="addTransaction"
 			>
 				<UFormGroup
 					label="Date"
