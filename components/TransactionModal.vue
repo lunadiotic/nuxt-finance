@@ -1,4 +1,5 @@
 <script setup>
+import { z } from 'zod';
 import { transactionTypeOptions } from '~~/constants';
 const props = defineProps({
 	modelValue: Boolean,
@@ -14,11 +15,27 @@ const isModalOpen = computed({
 });
 
 const state = ref({
-	date: new Date().toISOString().split('T')[0],
+	created_at: new Date().toISOString().split('T')[0],
 	description: undefined,
 	type: transactionTypeOptions[0],
 	amount: 0,
 });
+
+const schema = z.object({
+	created_at: z.string(),
+	description: z.string(),
+	type: z.enum(transactionTypeOptions),
+	amount: z.number().positive(),
+});
+
+const form = ref();
+
+const toast = useToast();
+const supabase = useSupabaseClient();
+
+const addTransaction = async () => {
+	form.value.validate();
+};
 </script>
 
 <template>
@@ -41,7 +58,12 @@ const state = ref({
 				</div>
 			</template>
 
-			<UForm :state="state">
+			<UForm
+				:state="state"
+				:schema="schema"
+				ref="form"
+				@submit.prevent="addTransaction"
+			>
 				<UFormGroup
 					label="Date"
 					:required="true"
@@ -52,7 +74,7 @@ const state = ref({
 						type="date"
 						placeholder="Date"
 						icon="i-heroicons-calendar-20-solid"
-						v-model="state.date"
+						v-model="state.created_at"
 					/>
 				</UFormGroup>
 
