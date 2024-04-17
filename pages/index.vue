@@ -116,28 +116,7 @@ const transactionsGroupedByDate = computed(() => {
 			</div>
 		</div>
 		<div>
-			<UModal v-model="isModalOpen" prevent-close>
-				<UCard>
-					<template #header>
-						<div class="flex items-center justify-between">
-							<h3
-								class="text-base font-semibold leading-6 text-gray-900 dark:text-white"
-							>
-								Add Transaction
-							</h3>
-							<UButton
-								color="gray"
-								variant="ghost"
-								icon="i-heroicons-x-mark-20-solid"
-								class="-my-1"
-								@click="isModalOpen = false"
-							/>
-						</div>
-					</template>
-
-					<Placeholder class="h-32" />
-				</UCard>
-			</UModal>
+			<TransactionModal v-model="isModalOpen" />
 			<UButton
 				icon="i-heroicons-plus-circle"
 				color="white"
