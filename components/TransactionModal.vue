@@ -1,4 +1,5 @@
 <script setup>
+import { transactionTypeOptions } from '~~/constants';
 const props = defineProps({
 	modelValue: Boolean,
 });
@@ -33,7 +34,36 @@ const isModalOpen = computed({
 				</div>
 			</template>
 
-			<Placeholder class="h-32" />
+			<UFormGroup label="Date" :required="true" name="created_at" class="mb-4">
+				<UInput
+					type="date"
+					placeholder="Date"
+					icon="i-heroicons-calendar-20-solid"
+				/>
+			</UFormGroup>
+
+			<UFormGroup
+				label="Description"
+				:required="true"
+				name="description"
+				class="mb-4"
+			>
+				<UInput type="text" placeholder="Description" />
+			</UFormGroup>
+
+			<UFormGroup label="Type" :required="true" name="type" class="mb-4">
+				<USelect
+					type="text"
+					placeholder="type of transaction"
+					:options="transactionTypeOptions"
+				/>
+			</UFormGroup>
+
+			<UFormGroup label="Amount" :required="true" name="amount" class="mb-4">
+				<UInput type="number" placeholder="Amount" />
+			</UFormGroup>
+
+			<UButton type="submit" color="black" variant="solid">Submit</UButton>
 		</UCard>
 	</UModal>
 </template>
