@@ -4,6 +4,8 @@ import { transactionViewOptions } from '~/constants';
 const selectedView = ref(transactionViewOptions[1]);
 const isModalOpen = ref(false);
 
+const dates = useSelectedTimePeriod(selectedView);
+
 const {
 	pending,
 	refresh,
