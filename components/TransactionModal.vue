@@ -4,7 +4,7 @@ import { transactionTypeOptions } from '~~/constants';
 const props = defineProps({
 	modelValue: Boolean,
 });
-const emit = defineEmits(['update:modelValue']);
+const emit = defineEmits(['update:modelValue', 'saved']);
 const isModalOpen = computed({
 	get() {
 		return props.modelValue;
@@ -35,6 +35,9 @@ const schema = z.object({
 });
 
 const form = ref();
+const isLoading = ref(false);
+const toast = useToast();
+const supabase = useSupabaseClient();
 
 const resetForm = () => {
 	Object.assign(state, initialState);
@@ -43,8 +46,29 @@ const resetForm = () => {
 
 async function addTransaction(event) {
 	if (form.value.errors.length) return;
-	console.log(event.data);
-	isModalOpen.value = false;
+	try {
+		isLoading.value = true;
+		const { error } = await supabase.from('transactions').upsert({ ...state });
+
+		if (!error) {
+			toast.add({
+				title: 'Success',
+				icon: 'i-heroicons-check-circle',
+				color: 'green',
+			});
+			isModalOpen.value = false;
+			emit('saved');
+		}
+	} catch (error) {
+		console.log(error);
+		toast.add({
+			title: error.message,
+			icon: 'i-heroicons-exclamation-circle',
+			color: 'red',
+		});
+	} finally {
+		isLoading.value = false;
+	}
 }
 </script>
 
@@ -114,7 +138,13 @@ async function addTransaction(event) {
 					<UInput type="number" placeholder="Amount" v-model="state.amount" />
 				</UFormGroup>
 
-				<UButton type="submit" color="black" variant="solid">Submit</UButton>
+				<UButton
+					type="submit"
+					color="black"
+					variant="solid"
+					:loading="isLoading"
+					>Submit</UButton
+				>
 			</UForm>
 		</UCard>
 	</UModal>
