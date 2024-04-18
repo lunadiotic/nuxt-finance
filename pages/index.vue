@@ -1,73 +1,22 @@
 <script setup>
 import { transactionViewOptions } from '~/constants';
 
-const supabase = useSupabaseClient();
 const selectedView = ref(transactionViewOptions[1]);
-const transactions = ref([]);
-const isLoading = ref(false);
 const isModalOpen = ref(false);
 
-const income = computed(() => {
-	return transactions.value.filter(
-		(transaction) => transaction.type === 'income'
-	);
-});
-const expense = computed(() => {
-	return transactions.value.filter(
-		(transaction) => transaction.type === 'expense'
-	);
-});
+const {
+	pending,
+	refresh,
+	transactions: {
+		income,
+		expense,
+		incomeTotal,
+		expenseTotal,
+		grouped: { byDate },
+	},
+} = useFetchTransactions();
 
-const incomeTotal = computed(() => {
-	return income.value.reduce((total, transaction) => {
-		return total + transaction.amount;
-	}, 0);
-});
-const expenseTotal = computed(() => {
-	return expense.value.reduce((total, transaction) => {
-		return total + transaction.amount;
-	}, 0);
-});
-
-const fetchTransactions = async () => {
-	isLoading.value = true;
-	try {
-		const { data } = await useAsyncData('transactions', async () => {
-			const { data, error } = await supabase
-				.from('transactions')
-				.select()
-				.order('created_at', { ascending: false });
-			if (error) return [];
-			return data;
-		});
-
-		return data.value;
-	} finally {
-		isLoading.value = false;
-	}
-};
-
-const refreshTransactions = async () => {
-	transactions.value = await fetchTransactions();
-};
-
-await refreshTransactions();
-
-const transactionsGroupedByDate = computed(() => {
-	let grouped = {};
-
-	for (const transaction of transactions.value) {
-		const date = new Date(transaction.created_at).toISOString().split('T')[0];
-
-		if (!grouped[date]) {
-			grouped[date] = [];
-		}
-
-		grouped[date].push(transaction);
-	}
-
-	return grouped;
-});
+await refresh();
 </script>
 
 <template>
@@ -78,32 +27,18 @@ const transactionsGroupedByDate = computed(() => {
 		</div>
 	</section>
 
-	<section
-		class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 sm:gap-16 mb-10"
-	>
+	<section class="grid grid-cols-1 sm:grid-cols-2 mb-10 text-center">
 		<Trend
 			title="Income"
 			:amount="incomeTotal"
 			:lastAmount="500"
-			:loading="isLoading"
+			:loading="pending"
 		/>
 		<Trend
 			title="Expense"
 			:amount="expenseTotal"
 			:lastAmount="3000"
-			:loading="isLoading"
-		/>
-		<Trend
-			title="Savings"
-			:amount="1000"
-			:lastAmount="1500"
-			:loading="isLoading"
-		/>
-		<Trend
-			title="Budget"
-			:amount="1000"
-			:lastAmount="500"
-			:loading="isLoading"
+			:loading="pending"
 		/>
 	</section>
 
@@ -116,7 +51,7 @@ const transactionsGroupedByDate = computed(() => {
 			</div>
 		</div>
 		<div>
-			<TransactionModal v-model="isModalOpen" @saved="refreshTransactions()" />
+			<TransactionModal v-model="isModalOpen" @saved="refresh()" />
 			<UButton
 				icon="i-heroicons-plus-circle"
 				color="white"
@@ -127,18 +62,14 @@ const transactionsGroupedByDate = computed(() => {
 		</div>
 	</section>
 
-	<section v-if="!isLoading">
-		<div
-			v-for="(transactionOnDay, date) in transactionsGroupedByDate"
-			:key="date"
-			class="mb-10"
-		>
+	<section v-if="!pending">
+		<div v-for="(transactionOnDay, date) in byDate" :key="date" class="mb-10">
 			<TransactionDailySummary :date="date" :transactions="transactionOnDay" />
 			<Transaction
 				v-for="(transaction, index) in transactionOnDay"
 				:key="index"
 				:transaction="transaction"
-				@delete="refreshTransactions()"
+				@delete="refresh()"
 			/>
 		</div>
 	</section>

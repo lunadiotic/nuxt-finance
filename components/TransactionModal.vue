@@ -127,7 +127,6 @@ async function addTransaction(event) {
 
 				<UFormGroup label="Type" :required="true" name="type" class="mb-4">
 					<USelect
-						type="text"
 						placeholder="type of transaction"
 						:options="transactionTypeOptions"
 						v-model="state.type"

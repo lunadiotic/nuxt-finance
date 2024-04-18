@@ -32,7 +32,7 @@ const { currency } = useCurrency(props.amount);
 </script>
 
 <template>
-	<div>
+	<div class="mb-4">
 		<div class="font-bold" :class="[color]">{{ title }}</div>
 		<div class="text-2xl font-extrabold text-black dark:text-white mb-2">
 			<USkeleton class="h-8 w-full" v-if="loading" />
@@ -40,7 +40,10 @@ const { currency } = useCurrency(props.amount);
 		</div>
 		<div>
 			<USkeleton class="h-6 w-full" v-if="loading" />
-			<div v-else class="flex space-x-1 items-center text-sm">
+			<div
+				v-else
+				class="flex justify-center space-x-1 items-center text-sm text-center"
+			>
 				<UIcon :name="icon" class="w-6 h-6" :class="color" />
 				<span class="text-gray-500 dark:text-gray-400">
 					{{ percentageTrending }} vs last periode
