@@ -4,7 +4,7 @@ import { transactionViewOptions } from '~/constants';
 const selectedView = ref(transactionViewOptions[1]);
 const isModalOpen = ref(false);
 
-const dates = useSelectedTimePeriod(selectedView);
+const { current, previous } = useSelectedTimePeriod(selectedView);
 
 const {
 	pending,
@@ -16,7 +16,7 @@ const {
 		expenseTotal,
 		grouped: { byDate },
 	},
-} = useFetchTransactions();
+} = useFetchTransactions(current);
 
 await refresh();
 </script>
