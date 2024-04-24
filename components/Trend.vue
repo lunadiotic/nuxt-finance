@@ -5,17 +5,23 @@ const props = defineProps({
 	lastAmount: Number,
 	loading: Boolean,
 });
+
+const { amount } = toRefs(props);
+
 const trendingUp = computed(() => props.amount >= props.lastAmount);
 const icon = computed(() =>
 	trendingUp.value
 		? 'i-heroicons-arrow-trending-up'
 		: 'i-heroicons-arrow-trending-down'
 );
+
 const color = computed(() => (trendingUp.value ? 'green' : 'red'));
+
+const { currency } = useCurrency(amount);
 
 const percentageTrending = computed(() => {
 	if (props.lastAmount === 0 || props.amount === 0) {
-		return '0%';
+		return '∞%';
 	}
 
 	const bigger = Math.max(props.amount, props.lastAmount);
@@ -23,12 +29,8 @@ const percentageTrending = computed(() => {
 
 	const ratio = ((bigger - lower) / bigger) * 100;
 
-	// console.log(bigger, lower, ratio, Math.ceil(ratio));
-
 	return `${Math.ceil(ratio)}%`;
 });
-
-const { currency } = useCurrency(props.amount);
 </script>
 
 <template>

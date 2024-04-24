@@ -18,7 +18,16 @@ const {
 	},
 } = useFetchTransactions(current);
 
+const {
+	refresh: refreshPrevious,
+	transactions: {
+		incomeTotal: incomeTotalPrevious,
+		expenseTotal: expenseTotalPrevious,
+	},
+} = useFetchTransactions(previous);
+
 await refresh();
+await refreshPrevious();
 </script>
 
 <template>
@@ -33,13 +42,13 @@ await refresh();
 		<Trend
 			title="Income"
 			:amount="incomeTotal"
-			:lastAmount="500"
+			:lastAmount="incomeTotalPrevious"
 			:loading="pending"
 		/>
 		<Trend
 			title="Expense"
 			:amount="expenseTotal"
-			:lastAmount="3000"
+			:lastAmount="expenseTotalPrevious"
 			:loading="pending"
 		/>
 	</section>
