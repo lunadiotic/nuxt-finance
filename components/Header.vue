@@ -1,3 +1,13 @@
+<script setup>
+const user = useSupabaseUser();
+watch(user, (user) => {
+	if (user) {
+		console.log('Logged in');
+		console.log(user);
+	}
+});
+</script>
+
 <template>
 	<header class="flex justify-between items-center mt-10">
 		<NuxtLink to="/" class="text-xl font-bold"> FTracker </NuxtLink>

@@ -1,5 +1,29 @@
 <script setup>
 const success = ref(false);
+const email = ref('');
+const pending = ref(false);
+const toast = useToast();
+const supabase = useSupabaseClient();
+
+const handleLogin = async () => {
+	try {
+		pending.value = true;
+		const { error } = await supabase.auth.signInWithOtp({
+			email: email.value,
+			options: { emailRedirectTo: 'http://localhost:3000' },
+		});
+		if (error) throw error;
+		toast.add({
+			title: 'Check your email for the login link!',
+			color: 'green',
+		});
+		success.value = true;
+	} catch (error) {
+		toast.add({ title: error.message, color: 'red' });
+	} finally {
+		pending.value = false;
+	}
+};
 </script>
 
 <template>
@@ -9,11 +33,11 @@ const success = ref(false);
 				<h3
 					class="text-base font-semibold leading-6 text-gray-900 dark:text-white"
 				>
-					Sign in to your account.
+					Sign up for an account.
 				</h3>
 			</div>
 		</template>
-		<form>
+		<form @submit.prevent="handleLogin">
 			<UFormGroup
 				label="Email"
 				:required="true"
@@ -23,8 +47,12 @@ const success = ref(false);
 			>
 				<UInput type="email" placeholder="Email" v-model="email" />
 			</UFormGroup>
-			<UButton type="submit" color="primary" @click="success = true"
-				>Login</UButton
+			<UButton
+				type="submit"
+				color="primary"
+				:loading="pending"
+				:disabled="pending"
+				>Sign up</UButton
 			>
 		</form>
 	</UCard>
